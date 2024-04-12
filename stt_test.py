@@ -1,7 +1,12 @@
+import sys
 import speech_recognition as sr
 import numpy as np
 import matplotlib.pyplot as plt
 import librosa
+
+# data sources: https://voiceage.com/Audio-Samples-AMR-WB.html
+# kaggle
+# korean: https://www.kaggle.com/datasets/bryanpark/korean-single-speaker-speech-dataset/data
 
 
 def find_split_points(envelope, sr, percent=100, isPlot=False):
@@ -47,13 +52,41 @@ def find_split_points(envelope, sr, percent=100, isPlot=False):
     return split_points
 
 
-audio_path = "harvard.wav"
-audio, sr_rate = librosa.load(audio_path)
-envelope = np.abs(audio)
-
-split_points = find_split_points(envelope, sr_rate)
+audio_file = "Korean_1_0000.wav"
+lang = "ko-KR"
+# languages:
+# en-US - English (United States)
+# es-ES - Spanish (Spain)
+# fr-FR - French (France)
+# de-DE - German (Germany)
+# zh-CN - Chinese (Mandarin/China)
+# hi-IN - Hindi (India)
+# ar-SA - Arabic (Saudi Arabia)
+# ru-RU - Russian (Russia)
+# ja-JP - Japanese (Japan)
+# ko-KR - Korean (South Korea)
 r = sr.Recognizer()
-recognized_texts = []
+
+with sr.AudioFile(audio_file) as source:
+    audio_data = r.record(source)
+    print("Recognizing...")
+    try:
+        textFull = r.recognize_google(audio_data, language=lang)
+        print(f"Full text in audio: \n{textFull}")
+    except sr.UnknownValueError:
+        print("Google Web Speech API could not understand audio")
+    except sr.RequestError as e:
+        print(f"Could not request results from Google Web Speech API; {e}")
+
+
+sys.exit()
+print("Recognising text by parts...")
+
+audio, sr_rate = librosa.load(audio_file)
+envelope = np.abs(audio)
+split_points = find_split_points(envelope, sr_rate/2, 150, False)
+
+recognized_texts = ""
 
 for i, point in enumerate(split_points):
     start = split_points[i-1] if i > 0 else 0
@@ -62,10 +95,14 @@ for i, point in enumerate(split_points):
     end_time = end / sr_rate
     fragment = audio[start:end]
 
-    with sr.AudioFile(audio_path) as source:
-        audio_data = r.record(source, offset=start_time, duration=end_time-start_time)
-        text = r.recognize_google(audio_data)
-        recognized_texts.append(text)
+    with sr.AudioFile(audio_file) as source:
+        audio_data = r.record(source, duration=end_time-start_time, offset=start_time)
+        try:
+            text = r.recognize_google(audio_data)
+            recognized_texts += "\n"+text
+        except sr.UnknownValueError:
+            print("Google Web Speech API could not understand audio")
+        except sr.RequestError as e:
+            print(f"Could not request results from Google Web Speech API; {e}")
 
-
-print("Recognized Text:", recognized_texts)
+print("Recognized Text:\n", recognized_texts)
