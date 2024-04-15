@@ -72,6 +72,7 @@ with sr.AudioFile(audio_file) as source:
     print("Recognizing...")
     try:
         textFull = r.recognize_google(audio_data, language=lang)
+        # this is from speech_recognition.recognizers import google.recognize_legacy
         print(f"Full text in audio: \n{textFull}")
     except sr.UnknownValueError:
         print("Google Web Speech API could not understand audio")
