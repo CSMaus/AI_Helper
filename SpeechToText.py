@@ -1,5 +1,6 @@
 import speech_recognition as sr
 import time
+from rpunct import RestorePuncts
 
 audio_file = "Trailer.wav"
 lang = "ru-RU"
@@ -19,9 +20,12 @@ useMicro = True
 
 if useMicro:
     # listening the speech and store in audio_text variable
+    # need to run this parts in parallel, to keep all text.
+    # i e if one part is recorded, then we sdtart recognize it and in parallel to write another part
     with sr.Microphone() as source:
+        # can setup hot word with using snowboy_configuration
         print("Please speak:")
-        audio_data = r.listen(source) # phrase_time_limit, timeout
+        audio_data = r.listen(source)  # phrase_time_limit, timeout
         print("Recognizing...")
 
         try:
