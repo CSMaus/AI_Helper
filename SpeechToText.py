@@ -1,9 +1,13 @@
 import speech_recognition as sr
 import time
-from rpunct import RestorePuncts
 
+
+# for punctuator make sure to have installed c++ build tools
+# https://visualstudio.microsoft.com/visual-cpp-build-tools/
+
+# punct_model = pipeline("text-generation", model="lvwerra/bert-imdb")
 audio_file = "Trailer.wav"
-lang = "ru-RU"
+lang = "en-US"
 # languages:
 # en-US - English (United States)
 # es-ES - Spanish (Spain)
@@ -16,7 +20,7 @@ lang = "ru-RU"
 # ja-JP - Japanese (Japan)
 # ko-KR - Korean (South Korea)
 r = sr.Recognizer()
-useMicro = True
+useMicro = False
 
 if useMicro:
     # listening the speech and store in audio_text variable
@@ -26,6 +30,7 @@ if useMicro:
         # can setup hot word with using snowboy_configuration
         print("Please speak:")
         audio_data = r.listen(source)  # phrase_time_limit, timeout
+        # listen_in_background
         print("Recognizing...")
 
         try:
@@ -45,6 +50,9 @@ else:
         try:
             text = r.recognize_google(audio_data, language=lang)
             print(f"The text in audio: \n{text}")
+
+            # punctuated_text = punct_model(text)[0]['generated_text']
+            # print(f"Punctuated text: \n{punctuated_text}")
             print(f"Time taken: {time.time() - tstart} sec")
         except sr.UnknownValueError:
             print("Google Web Speech API could not understand audio")
